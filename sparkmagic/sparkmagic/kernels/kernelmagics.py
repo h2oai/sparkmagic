@@ -326,6 +326,35 @@ class KernelMagics(SparkMagicBase):
 
         return self.session_started
 
+    @magic_arguments()
+    @line_magic
+    @argument("-i", "--session_id", type=int, help="Livy session ID")
+    @_event
+    def _do_not_call_connect_session(self, line, cell="", local_ns=None):
+        args = parse_argstring_or_throw(self._do_not_call_connect_session, line)
+        session_id = args.session_id
+
+        if self.fatal_error:
+            self.ipython_display.send_error(self.fatal_error_message)
+            return False
+
+        if not self.session_started:
+            properties = conf.get_session_properties(self.language)
+            self.session_started = True
+
+            try:
+                self.spark_controller.add_existing_session(self.session_name, self.endpoint, session_id, properties)
+            except Exception as e:
+                self.fatal_error = True
+                self.fatal_error_message = conf.fatal_error_suggestion().format(e)
+                self.logger.error(u"Error connecting to session: {}".format(e))
+                self.ipython_display.send_error(self.fatal_error_message)
+                return False
+
+        self.ipython_display.writeln(u"SparkSession available as 'spark'.")
+        self.ipython_display.writeln(u"H2OContext available as 'hc'.")
+        return self.session_started
+
     @cell_magic
     @handle_expected_exceptions
     def _do_not_call_delete_session(self, line, cell="", local_ns=None):

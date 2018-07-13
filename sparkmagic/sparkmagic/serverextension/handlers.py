@@ -39,6 +39,7 @@ class ReconnectHandler(IPythonHandler):
             username = self._get_argument_or_raise(data, 'username')
             password = self._get_argument_or_raise(data, 'password')
             endpoint = self._get_argument_or_raise(data, 'endpoint')
+            session_id = self._get_argument_or_raise(data, 'session_id')
             auth = self._get_argument_if_exists(data, 'auth')
             if auth is None:
                 if username == '' and password == '':
@@ -60,6 +61,19 @@ class ReconnectHandler(IPythonHandler):
         # Execute code
         client = kernel_manager.client()
         code = '%{} -s {} -u {} -p {} -t {}'.format(KernelMagics._do_not_call_change_endpoint.__name__, endpoint, username, password, auth)
+        response_id = client.execute(code, silent=False, store_history=False)
+        msg = client.get_shell_msg(response_id)
+
+        # Get execution info
+        successful_message = self._msg_successful(msg)
+        error = self._msg_error(msg)
+        if successful_message:
+            status_code = 200
+        else:
+            self.logger.error(u"Code to reconnect errored out: {}".format(error))
+            status_code = 500
+
+        code = '%{} -i {}'.format(KernelMagics._do_not_call_connect_session.__name__, session_id)
         response_id = client.execute(code, silent=False, store_history=False)
         msg = client.get_shell_msg(response_id)
 

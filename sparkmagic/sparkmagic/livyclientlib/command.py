@@ -29,7 +29,7 @@ class Command(ObjectWithGuid):
         statement_id = -1
         try:
             session.wait_for_idle()
-            data = {u"code": self.code}
+            data = {u"code": self.code, u"kind": session.kind}
             response = session.http_client.post_statement(session.id, data)
             statement_id = response[u'id']
             output = self._get_statement_output(session, statement_id)
