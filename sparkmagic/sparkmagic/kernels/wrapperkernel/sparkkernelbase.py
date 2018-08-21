@@ -54,7 +54,7 @@ class SparkKernelBase(IPythonKernel):
 
     def do_shutdown(self, restart):
         # Cleanup
-        self._delete_session()
+        # self._delete_session()
 
         return self._do_shutdown_ipykernel(restart)
 

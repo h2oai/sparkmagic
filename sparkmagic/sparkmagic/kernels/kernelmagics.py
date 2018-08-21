@@ -311,18 +311,9 @@ class KernelMagics(SparkMagicBase):
             return False
 
         if not self.session_started:
-            skip = False
-            properties = conf.get_session_properties(self.language)
-            self.session_started = True
-
-            try:
-                self.spark_controller.add_session(self.session_name, self.endpoint, skip, properties)
-            except Exception as e:
-                self.fatal_error = True
-                self.fatal_error_message = conf.fatal_error_suggestion().format(e)
-                self.logger.error(u"Error creating session: {}".format(e))
-                self.ipython_display.send_error(self.fatal_error_message)
-                return False
+            self.logger.error("Notebook is not connected to any cluster")
+            self.ipython_display.send_error("Notebook is not connected to any cluster")
+            return False
 
         return self.session_started
 
