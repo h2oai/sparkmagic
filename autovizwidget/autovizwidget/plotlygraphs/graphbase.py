@@ -6,7 +6,7 @@ from plotly.offline import iplot
 try:
     from pandas.core.base import DataError
 except:
-    from pandas.core.groupby.groupby import DataError
+    from pandas.core.groupby import DataError
 
 from ..widget.encoding import Encoding
 from ..widget.invalidencodingerror import InvalidEncodingError
